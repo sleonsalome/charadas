@@ -135,12 +135,32 @@
     font-size: 1.6rem;
   }
 
+  .timer-group {
+    display: flex;
+    gap: 28px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .timer-block {
+    text-align: center;
+  }
+
+  .timer-label {
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--cream);
+    opacity: 0.55;
+    margin-bottom: 4px;
+  }
+
   .timer {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(2.4rem, 8vw, 3.4rem);
+    font-size: clamp(2rem, 7vw, 2.8rem);
     letter-spacing: 3px;
     color: var(--gold);
-    margin-top: 20px;
     text-shadow: 0 0 14px rgba(232,179,61,0.3);
     transition: color 0.3s ease, text-shadow 0.3s ease;
   }
@@ -148,6 +168,12 @@
     color: #e05252;
     text-shadow: 0 0 16px rgba(224,82,82,0.5);
     animation: pulse 0.6s infinite;
+  }
+  .timer.paused {
+    color: var(--cream);
+    opacity: 0.5;
+    text-shadow: none;
+    animation: none;
   }
   @keyframes pulse {
     0%, 100% { transform: scale(1); }
@@ -219,6 +245,16 @@
   }
   .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
 
+  .btn-pause {
+    background: var(--velvet);
+    color: var(--cream);
+  }
+  .btn-pause:hover { box-shadow: 0 6px 18px rgba(122,22,48,0.5); }
+  .btn-pause.is-paused {
+    background: var(--gold);
+    color: #1a1207;
+  }
+
   footer {
     margin-top: 40px;
     font-size: 0.75rem;
@@ -232,10 +268,10 @@
   <div class="marquee-frame">
     <div class="bulbs" id="bulbs"></div>
     <div class="marquee-inner">
-      <h1>Adivina la película</h1>
+      <h1>Mímicas de Cine</h1>
     </div>
   </div>
-  <p class="subtitle">90 PELÍCULAS · SIGLO XXI · PARA ADIVINAR</p>
+  <p class="subtitle">90 PELÍCULAS · SIGLO XXI · SIN REPETIR</p>
 
   <div class="stage">
     <div class="ticket" id="ticket">
@@ -243,13 +279,24 @@
     </div>
   </div>
 
-  <div class="timer" id="timer">03:00</div>
+  <div class="timer-group">
+    <div class="timer-block">
+      <div class="timer-label">Ronda (mímica)</div>
+      <div class="timer" id="movieTimer">03:00</div>
+    </div>
+    <div class="timer-block">
+      <div class="timer-label">Tiempo del equipo</div>
+      <div class="timer" id="teamTimer">10:00</div>
+    </div>
+  </div>
 
   <div class="bar"><div class="bar-fill" id="barFill" style="width:100%"></div></div>
   <p class="counter" id="counter">Quedan <strong>90</strong> de 90 películas</p>
 
   <div class="controls">
     <button class="btn-primary" id="pickBtn">🎬 Elegir película</button>
+    <button class="btn-pause" id="pauseBtn">⏸️ Pausar</button>
+    <button class="btn-secondary" id="stopBtn">⏹️ Detener tiempo</button>
     <button class="btn-secondary" id="resetBtn">Reiniciar juego</button>
   </div>
 
@@ -277,18 +324,24 @@
   ];
 
   const TOTAL = movies.length;
-  const ROUND_SECONDS = 180; // 3 minutos
+  const MOVIE_ROUND_SECONDS = 180; // 3 minutos por película
+  const TEAM_ROUND_SECONDS = 600;  // 10 minutos por equipo
   let pool = [];
-  let timerInterval = null;
-  let secondsLeft = ROUND_SECONDS;
+  let tickInterval = null;
+  let isPaused = false;
+  let movieSecondsLeft = MOVIE_ROUND_SECONDS;
+  let teamSecondsLeft = TEAM_ROUND_SECONDS;
 
   const ticketEl = document.getElementById('ticket');
   const counterEl = document.getElementById('counter');
   const barFill = document.getElementById('barFill');
   const pickBtn = document.getElementById('pickBtn');
+  const pauseBtn = document.getElementById('pauseBtn');
+  const stopBtn = document.getElementById('stopBtn');
   const resetBtn = document.getElementById('resetBtn');
   const bulbsEl = document.getElementById('bulbs');
-  const timerEl = document.getElementById('timer');
+  const movieTimerEl = document.getElementById('movieTimer');
+  const teamTimerEl = document.getElementById('teamTimer');
 
   function formatTime(s) {
     const m = Math.floor(s / 60).toString().padStart(2, '0');
@@ -296,33 +349,43 @@
     return `${m}:${sec}`;
   }
 
-  function renderTimer() {
-    timerEl.textContent = formatTime(secondsLeft);
-    timerEl.classList.toggle('low', secondsLeft <= 10);
+  function renderTimers() {
+    movieTimerEl.textContent = formatTime(movieSecondsLeft);
+    movieTimerEl.classList.toggle('low', movieSecondsLeft <= 10 && movieSecondsLeft > 0);
+    movieTimerEl.classList.toggle('paused', isPaused);
+
+    teamTimerEl.textContent = formatTime(teamSecondsLeft);
+    teamTimerEl.classList.toggle('low', teamSecondsLeft <= 10 && teamSecondsLeft > 0);
+    teamTimerEl.classList.toggle('paused', isPaused);
   }
 
-  function stopTimer() {
-    if (timerInterval) {
-      clearInterval(timerInterval);
-      timerInterval = null;
+  function stopTick() {
+    if (tickInterval) {
+      clearInterval(tickInterval);
+      tickInterval = null;
     }
   }
 
-  function startTimer() {
-    stopTimer();
-    secondsLeft = ROUND_SECONDS;
-    renderTimer();
-    timerInterval = setInterval(() => {
-      secondsLeft--;
-      if (secondsLeft <= 0) {
-        secondsLeft = 0;
-        renderTimer();
-        stopTimer();
-        timerEl.textContent = '¡TIEMPO!';
-      } else {
-        renderTimer();
+  function startTick() {
+    stopTick();
+    tickInterval = setInterval(() => {
+      if (movieSecondsLeft > 0) movieSecondsLeft--;
+      if (teamSecondsLeft > 0) teamSecondsLeft--;
+      renderTimers();
+      if (movieSecondsLeft === 0 && teamSecondsLeft === 0) {
+        stopTick();
       }
     }, 1000);
+  }
+
+  function resetTimers() {
+    stopTick();
+    isPaused = false;
+    movieSecondsLeft = MOVIE_ROUND_SECONDS;
+    teamSecondsLeft = TEAM_ROUND_SECONDS;
+    pauseBtn.textContent = '⏸️ Pausar';
+    pauseBtn.classList.remove('is-paused');
+    renderTimers();
   }
 
   function layoutBulbs() {
@@ -351,9 +414,7 @@
     ticketEl.innerHTML = '<span class="placeholder">Presiona "Elegir película" para empezar</span>';
     pickBtn.disabled = false;
     pickBtn.textContent = '🎬 Elegir película';
-    stopTimer();
-    secondsLeft = ROUND_SECONDS;
-    renderTimer();
+    resetTimers();
   }
 
   function updateCounter() {
@@ -373,7 +434,14 @@
     ticketEl.innerHTML = `<span class="movie-title">${chosen}</span>`;
 
     updateCounter();
-    startTimer();
+
+    // Al elegir película: se reinicia la ronda de 3 min, el tiempo del equipo sigue corriendo
+    movieSecondsLeft = MOVIE_ROUND_SECONDS;
+    isPaused = false;
+    pauseBtn.textContent = '⏸️ Pausar';
+    pauseBtn.classList.remove('is-paused');
+    renderTimers();
+    startTick();
 
     if (pool.length === 0) {
       pickBtn.disabled = true;
@@ -381,7 +449,24 @@
     }
   }
 
+  function togglePause() {
+    if (!tickInterval && !isPaused) return; // nada corriendo todavía
+    isPaused = !isPaused;
+    if (isPaused) {
+      stopTick();
+      pauseBtn.textContent = '▶️ Reanudar';
+      pauseBtn.classList.add('is-paused');
+    } else {
+      startTick();
+      pauseBtn.textContent = '⏸️ Pausar';
+      pauseBtn.classList.remove('is-paused');
+    }
+    renderTimers();
+  }
+
   pickBtn.addEventListener('click', pickMovie);
+  pauseBtn.addEventListener('click', togglePause);
+  stopBtn.addEventListener('click', resetTimers);
   resetBtn.addEventListener('click', resetPool);
 
   layoutBulbs();
