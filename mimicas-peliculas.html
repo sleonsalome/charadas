@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mímicas de Cine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0b0f;
+    --velvet: #7a1630;
+    --velvet-dark: #4a0d1e;
+    --gold: #e8b33d;
+    --gold-dim: #a67d2e;
+    --cream: #f5ecd8;
+    --card-bg: #141017;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: radial-gradient(ellipse at top, #1a1420 0%, var(--bg) 60%);
+    color: var(--cream);
+    font-family: 'Poppins', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 32px 20px 60px;
+    overflow-x: hidden;
+  }
+
+  .marquee-frame {
+    position: relative;
+    padding: 6px;
+    background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+    border-radius: 14px;
+    margin-bottom: 8px;
+  }
+
+  .marquee-inner {
+    background: var(--velvet-dark);
+    border-radius: 10px;
+    padding: 18px 40px;
+    position: relative;
+  }
+
+  .bulbs {
+    position: absolute;
+    top: -3px; left: -3px; right: -3px; bottom: -3px;
+    border-radius: 14px;
+    pointer-events: none;
+  }
+  .bulb {
+    position: absolute;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 6px 2px rgba(232,179,61,0.8);
+    animation: twinkle 1.6s infinite ease-in-out;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 1; }
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.2rem, 6vw, 3.2rem);
+    letter-spacing: 4px;
+    text-align: center;
+    color: var(--gold);
+    text-shadow: 0 0 18px rgba(232,179,61,0.35);
+  }
+
+  .subtitle {
+    text-align: center;
+    color: var(--cream);
+    opacity: 0.65;
+    font-size: 0.85rem;
+    margin-top: 30px;
+    margin-bottom: 28px;
+    letter-spacing: 1px;
+  }
+
+  .stage {
+    width: 100%;
+    max-width: 460px;
+    perspective: 1200px;
+    margin-top: 10px;
+  }
+
+  .ticket {
+    position: relative;
+    background: var(--card-bg);
+    border: 2px dashed var(--gold-dim);
+    border-radius: 16px;
+    min-height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 28px;
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  }
+
+  .ticket.reveal {
+    animation: pop 0.4s ease;
+  }
+  @keyframes pop {
+    0% { transform: scale(0.9); opacity: 0.4; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .ticket .placeholder {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 2px;
+    color: var(--gold-dim);
+  }
+
+  .ticket .movie-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(1.8rem, 7vw, 2.6rem);
+    letter-spacing: 1px;
+    color: var(--cream);
+    line-height: 1.15;
+  }
+
+  .ticket.empty .movie-title {
+    color: var(--gold);
+    font-size: 1.6rem;
+  }
+
+  .timer {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.4rem, 8vw, 3.4rem);
+    letter-spacing: 3px;
+    color: var(--gold);
+    margin-top: 20px;
+    text-shadow: 0 0 14px rgba(232,179,61,0.3);
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+  }
+  .timer.low {
+    color: #e05252;
+    text-shadow: 0 0 16px rgba(224,82,82,0.5);
+    animation: pulse 0.6s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+  }
+
+  .counter {
+    text-align: center;
+    margin-top: 22px;
+    font-size: 0.95rem;
+    color: var(--cream);
+    opacity: 0.85;
+  }
+  .counter strong { color: var(--gold); }
+
+  .bar {
+    width: 100%;
+    max-width: 460px;
+    height: 6px;
+    background: rgba(245,236,216,0.12);
+    border-radius: 3px;
+    margin-top: 10px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+    transition: width 0.4s ease;
+  }
+
+  .controls {
+    display: flex;
+    gap: 14px;
+    margin-top: 34px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  button {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 14px 28px;
+    border-radius: 30px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    letter-spacing: 0.3px;
+  }
+  button:active { transform: scale(0.96); }
+
+  .btn-primary {
+    background: var(--gold);
+    color: #1a1207;
+    box-shadow: 0 6px 18px rgba(232,179,61,0.35);
+  }
+  .btn-primary:hover { box-shadow: 0 8px 24px rgba(232,179,61,0.5); }
+  .btn-primary:disabled {
+    background: #5a5348;
+    color: #999;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--cream);
+    border: 1.5px solid rgba(245,236,216,0.3);
+  }
+  .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+
+  footer {
+    margin-top: 40px;
+    font-size: 0.75rem;
+    color: rgba(245,236,216,0.4);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+  <div class="marquee-frame">
+    <div class="bulbs" id="bulbs"></div>
+    <div class="marquee-inner">
+      <h1>Adivina la película</h1>
+    </div>
+  </div>
+  <p class="subtitle">90 PELÍCULAS · SIGLO XXI · PARA ADIVINAR</p>
+
+  <div class="stage">
+    <div class="ticket" id="ticket">
+      <span class="placeholder">Presiona "Elegir película" para empezar</span>
+    </div>
+  </div>
+
+  <div class="timer" id="timer">03:00</div>
+
+  <div class="bar"><div class="bar-fill" id="barFill" style="width:100%"></div></div>
+  <p class="counter" id="counter">Quedan <strong>90</strong> de 90 películas</p>
+
+  <div class="controls">
+    <button class="btn-primary" id="pickBtn">🎬 Elegir película</button>
+    <button class="btn-secondary" id="resetBtn">Reiniciar juego</button>
+  </div>
+
+  <footer>Cada película se descarta automáticamente al salir.</footer>
+
+<script>
+  const movies = [
+    "Shrek","Buscando a Nemo","Piratas del Caribe: La maldición del Perla Negra","Spider-Man",
+    "El Señor de los Anillos: La Comunidad del Anillo","Harry Potter y la piedra filosofal","Gladiador",
+    "Avatar","Up","Toy Story 3","Frozen","Kung Fu Panda","Los Increíbles","Cars","Ratatouille","WALL-E",
+    "Madagascar","Ice Age","Shrek 2","El Rey León (2019)","Coco","Zootopia","Moana","Encanto",
+    "Jumanji: Bienvenidos a la jungla","Los Vengadores","Iron Man","Black Panther","Deadpool",
+    "Batman: El Caballero de la Noche","Wonder Woman","Guardianes de la Galaxia","Doctor Strange",
+    "Spider-Man: No Way Home","La La Land","Mamma Mia!","Crepúsculo","Los Juegos del Hambre","Divergente",
+    "Rápidos y Furiosos","Misión Imposible","007: Casino Royale","El origen (Inception)","Interstellar",
+    "Gravity","Mad Max: Furia en el camino","Jurassic World","King Kong","El conjuro","It","Zombieland",
+    "Guerra Mundial Z","Soy Leyenda","300","El Gran Showman","Bohemian Rhapsody","Rocketman",
+    "Ford v Ferrari","Buscando a Dory","Intensamente","Sing: ¡Ven y canta!","Los Minions",
+    "Mi villano favorito","Hotel Transylvania","Shrek Tercero","El gato con botas","Kung Fu Panda 2",
+    "Cómo entrenar a tu dragón","Rio","Épico","Space Jam: Una nueva era","Sonic, la película","Barbie",
+    "Super Mario Bros: La película","Wonka","Elemental","Luca","Onward: Hacia adelante","Soul",
+    "Turning Red","Puss in Boots: El último deseo","Free Guy","Jumanji: El siguiente nivel","Ant-Man",
+    "Aquaman","Shazam!","El Grinch","Dumbo","Aladdin","La Bella y la Bestia"
+  ];
+
+  const TOTAL = movies.length;
+  const ROUND_SECONDS = 180; // 3 minutos
+  let pool = [];
+  let timerInterval = null;
+  let secondsLeft = ROUND_SECONDS;
+
+  const ticketEl = document.getElementById('ticket');
+  const counterEl = document.getElementById('counter');
+  const barFill = document.getElementById('barFill');
+  const pickBtn = document.getElementById('pickBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const bulbsEl = document.getElementById('bulbs');
+  const timerEl = document.getElementById('timer');
+
+  function formatTime(s) {
+    const m = Math.floor(s / 60).toString().padStart(2, '0');
+    const sec = (s % 60).toString().padStart(2, '0');
+    return `${m}:${sec}`;
+  }
+
+  function renderTimer() {
+    timerEl.textContent = formatTime(secondsLeft);
+    timerEl.classList.toggle('low', secondsLeft <= 10);
+  }
+
+  function stopTimer() {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+  }
+
+  function startTimer() {
+    stopTimer();
+    secondsLeft = ROUND_SECONDS;
+    renderTimer();
+    timerInterval = setInterval(() => {
+      secondsLeft--;
+      if (secondsLeft <= 0) {
+        secondsLeft = 0;
+        renderTimer();
+        stopTimer();
+        timerEl.textContent = '¡TIEMPO!';
+      } else {
+        renderTimer();
+      }
+    }, 1000);
+  }
+
+  function layoutBulbs() {
+    bulbsEl.innerHTML = '';
+    const count = 18;
+    for (let i = 0; i < count; i++) {
+      const b = document.createElement('div');
+      b.className = 'bulb';
+      const t = i / count;
+      let x, y;
+      if (t < 0.25) { x = t / 0.25 * 100; y = 0; }
+      else if (t < 0.5) { x = 100; y = (t - 0.25) / 0.25 * 100; }
+      else if (t < 0.75) { x = 100 - (t - 0.5) / 0.25 * 100; y = 100; }
+      else { x = 0; y = 100 - (t - 0.75) / 0.25 * 100; }
+      b.style.left = `calc(${x}% - 3.5px)`;
+      b.style.top = `calc(${y}% - 3.5px)`;
+      b.style.animationDelay = `${(i * 0.09).toFixed(2)}s`;
+      bulbsEl.appendChild(b);
+    }
+  }
+
+  function resetPool() {
+    pool = [...movies];
+    updateCounter();
+    ticketEl.classList.remove('empty', 'reveal');
+    ticketEl.innerHTML = '<span class="placeholder">Presiona "Elegir película" para empezar</span>';
+    pickBtn.disabled = false;
+    pickBtn.textContent = '🎬 Elegir película';
+    stopTimer();
+    secondsLeft = ROUND_SECONDS;
+    renderTimer();
+  }
+
+  function updateCounter() {
+    counterEl.innerHTML = `Quedan <strong>${pool.length}</strong> de ${TOTAL} películas`;
+    barFill.style.width = `${(pool.length / TOTAL) * 100}%`;
+  }
+
+  function pickMovie() {
+    if (pool.length === 0) return;
+    const idx = Math.floor(Math.random() * pool.length);
+    const chosen = pool[idx];
+    pool.splice(idx, 1);
+
+    ticketEl.classList.remove('reveal');
+    void ticketEl.offsetWidth;
+    ticketEl.classList.add('reveal');
+    ticketEl.innerHTML = `<span class="movie-title">${chosen}</span>`;
+
+    updateCounter();
+    startTimer();
+
+    if (pool.length === 0) {
+      pickBtn.disabled = true;
+      pickBtn.textContent = 'No quedan películas';
+    }
+  }
+
+  pickBtn.addEventListener('click', pickMovie);
+  resetBtn.addEventListener('click', resetPool);
+
+  layoutBulbs();
+  resetPool();
+</script>
+</body>
+</html>
