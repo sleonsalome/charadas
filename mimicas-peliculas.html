@@ -80,14 +80,14 @@
     color: var(--cream);
     opacity: 0.65;
     font-size: 0.85rem;
-    margin-top: 30px;
-    margin-bottom: 28px;
+    margin-top: 20px;
+    margin-bottom: 18px;
     letter-spacing: 1px;
   }
 
   .stage {
     width: 100%;
-    max-width: 460px;
+    max-width: 600px;
     perspective: 1200px;
     margin-top: 10px;
   }
@@ -97,7 +97,7 @@
     background: var(--card-bg);
     border: 2px dashed var(--gold-dim);
     border-radius: 16px;
-    min-height: 220px;
+    min-height: 300px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -117,14 +117,14 @@
 
   .ticket .placeholder {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.4rem;
+    font-size: 2.0rem;
     letter-spacing: 2px;
     color: var(--gold-dim);
   }
 
   .ticket .movie-title {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(1.8rem, 7vw, 2.6rem);
+    font-size: clamp(2.5rem, 9vw, 4rem);
     letter-spacing: 1px;
     color: var(--cream);
     line-height: 1.15;
@@ -271,6 +271,7 @@
       <h1>Adivina la película</h1>
     </div>
   </div>
+
   <p class="subtitle">100 PELÍCULAS · SIGLO XXI · PARA ADIVINAR</p>
 
   <div class="stage">
@@ -282,22 +283,22 @@
   <div class="timer-group">
     <div class="timer-block">
       <div class="timer-label">Tiempo de la ronda</div>
-      <div class="timer" id="movieTimer">03:00</div>
+      <div class="timer" id="movieTimer">01:00</div>
     </div>
     <div class="timer-block">
       <div class="timer-label">Tiempo del equipo</div>
-      <div class="timer" id="teamTimer">10:00</div>
+      <div class="timer" id="teamTimer">05:00</div>
     </div>
   </div>
 
   <div class="bar"><div class="bar-fill" id="barFill" style="width:100%"></div></div>
-  <p class="counter" id="counter">Quedan <strong>90</strong> de 90 películas</p>
+  <p class="counter" id="counter">Quedan <strong>100</strong> de 100 películas</p>
 
   <div class="controls">
     <button class="btn-primary" id="pickBtn">🎬 Elegir película</button>
     <button class="btn-pause" id="pauseBtn">⏸️ Pausar</button>
-    <button class="btn-secondary" id="stopBtn">⏹️ Detener tiempo</button>
-    <button class="btn-secondary" id="resetBtn">Reiniciar juego</button>
+    <button class="btn-secondary" id="stopBtn">⏹️ Reiniciar tiempo</button>
+    <button class="btn-secondary" id="resetBtn">🔄 Reiniciar juego</button>
   </div>
 
   <footer>Cada película se descarta automáticamente al salir.</footer>
@@ -324,8 +325,8 @@
   ];
 
   const TOTAL = movies.length;
-  const MOVIE_ROUND_SECONDS = 180; // 3 minutos por película
-  const TEAM_ROUND_SECONDS = 600;  // 10 minutos por equipo
+  const MOVIE_ROUND_SECONDS = 60; // 1 minuto por película
+  const TEAM_ROUND_SECONDS = 300;  // 5 minutos por equipo
   let pool = [];
   let tickInterval = null;
   let isPaused = false;
